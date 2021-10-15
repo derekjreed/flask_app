@@ -5,9 +5,10 @@ import os
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
@@ -21,6 +22,7 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
+migrate = Migrate(app, db)
 # TODO: connect to a local postgresql database
 
 #----------------------------------------------------------------------------#
@@ -36,7 +38,9 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
+    genres = db.Column(db.String(20))
     image_link = db.Column(db.String(500))
+    website_link = db.Column(db.String(120))
     facebook_link = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500))
@@ -44,7 +48,7 @@ class Venue(db.Model):
     def __repr__(self):
        return f'<Venue ID: {self.id}, name: {self.name}, city: {self.city}>, state: {self.state}, address: {self.address}, phone: {self.phone}, image_link: {self.image_link}, facebook_link: {self.facebook_link}>'
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate DONE
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -64,7 +68,7 @@ class Artist(db.Model):
        return f'<Artist ID: {self.id}, name: {self.name}, city: {self.city}, state: {self.state}, phone: {self.phone}, genres: {self.genres}, image_link: {self.image_link}, facebook_link: {self.facebook_link}>'
 # initial db creation
 #db.create_all()
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate DONE
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
@@ -98,6 +102,8 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue.
+
+  '''
   data=[{
     "city": "San Francisco",
     "state": "CA",
@@ -119,6 +125,19 @@ def venues():
       "num_upcoming_shows": 0,
     }]
   }]
+  '''
+  data = []
+  
+  state_and_city = db.session.query(Venue.city, Venue.state).distinct(Venue.city, Venue.state)
+  for x in state_and_city:
+    venues = []
+    venue_list = Venue.query.filter(Venue.state == x.state).filter(Venue.city == x.city).all()
+    
+    for y in venue_list:
+      venues.append({'id': y.id, 'name': y.name, 'num_upcoming_shows': '0'})
+      
+    data.append({'city': x.city, 'state': x.state, 'venues': venues})
+    
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
@@ -126,6 +145,7 @@ def search_venues():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  '''
   response={
     "count": 1,
     "data": [{
@@ -133,13 +153,23 @@ def search_venues():
       "name": "The Dueling Pianos Bar",
       "num_upcoming_shows": 0,
     }]
+
+
   }
+  '''
+  search_term = request.form.get('search_term', '')
+  result = db.session.query(Venue).filter(Venue.name.ilike(f'%{search_term}%')).all()
+  count = len(result)
+  response = {"count": count, "data": result}
+
+
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
+  '''
   data1={
     "id": 1,
     "name": "The Musical Hop",
@@ -218,6 +248,28 @@ def show_venue(venue_id):
     "upcoming_shows_count": 1,
   }
   data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
+  '''
+  venue = Venue.query.filter(Venue.id == venue_id).first()
+
+  data = {
+    "id": venue.id,
+    "name": venue.name,
+#   "genres": [venue.genres],
+    "address": venue.address,
+    "city": venue.city,
+    "state": venue.state,  
+    "phone": venue.phone,
+#   "website": venue.website,
+    "facebook_link": venue.facebook_link,
+    "seeking_talent": venue.seeking_talent,
+    "seeking_description": venue.seeking_description,
+    "image_link": venue.image_link,   
+ #   "past_shows": past_shows,
+ #   "upcoming_shows": upcoming_shows,
+    "past_shows_count": 0,
+    "upcoming_shows_count": 0,
+  }
+
   return render_template('pages/show_venue.html', venue=data)
 
 #  Create Venue
@@ -232,9 +284,32 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+  try:
+    venue = Venue(
+      name=request.form['name'],
+      city=request.form['city'],
+      state=request.form['state'],
+      address=request.form['address'],
+      phone=request.form['phone'],
+      genres=request.form.getlist('genres'),
+      image_link=request.form['image_link'],
+      facebook_link=request.form['facebook_link'],
+      website_link=request.form['website_link'],
+      seeking_talent=bool(request.form.get('seeking_talent', False)),
+      seeking_description=request.form['seeking_description']        
+    )
 
+    db.session.add(venue)
+    db.session.commit()
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  except Exception as e:
+    print(e)
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed')
+    db.session.rollback()
+  finally:
+    db.session.close()
   # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
