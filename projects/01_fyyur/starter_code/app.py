@@ -5,7 +5,7 @@ import os
 import json
 import dateutil.parser
 import babel
-import datetime
+from datetime import datetime
 from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
 from flask_moment import Moment
 import logging
@@ -96,7 +96,7 @@ def show_venue(venue_id):
   data = {
     "id": venue.id,
     "name": venue.name,
-    "genres": [venue.genres],
+    "genres": venue.genres,
     "address": venue.address,
     "city": venue.city,
     "state": venue.state,  
@@ -222,7 +222,7 @@ def show_artist(artist_id):
   data = {
     "id": artist.id,
     "name": artist.name,
-    "genres": [artist.genres],
+    "genres": artist.genres,
     "city": artist.city,
     "state": artist.state,  
     "phone": artist.phone,
