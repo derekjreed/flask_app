@@ -125,6 +125,35 @@ def create_app(test_config=None):
   This removal will persist in the database and when you refresh the page. 
   COMPLETED
   '''
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+    body = request.get_json()
+
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_difficulty = body.get('difficulty', None)
+    new_category = body.get('category', None)
+
+    #if ((new_question == None) or (new_answer == None) or (new_difficulty == None) or (new_category)):
+      #abort(422)
+
+    try:
+        question = Question(question=new_question, answer=new_answer,
+            difficulty=new_difficulty, category=new_category)
+        question.insert()
+
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)
+
+        return jsonify({
+          'success': True,
+          'created': question.id,
+          'questions': current_questions,
+          'total_books': len(Question.query.all())
+        })
+
+    except:
+      abort(422)
 
   '''
   @TODO: 
