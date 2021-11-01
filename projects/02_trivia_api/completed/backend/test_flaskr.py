@@ -18,6 +18,10 @@ class TriviaTestCase(unittest.TestCase):
         self.database_path = "postgresql://{}:{}@{}/{}".format('postgres', 'password123', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
+        self.new_search = {
+            'searchTerm': 'the',
+        }
+
         # binds the app to the current context
         with self.app.app_context():
             self.db = SQLAlchemy()
@@ -52,15 +56,24 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource not found')
 
     def test_delete_questions(self):
-        res = self.client().delete('/questions/23')
+        res = self.client().delete('/questions/4')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 23).one_or_none()
+        question = Question.query.filter(Question.id == 4).one_or_none()
 
-        #self.assertEqual(res.status_code, 200)
-        #self.assertEqual(data['success'], True)
-        #self.assertEqual(data['deleted'], 23)
-        self.assertEqual(data['question'], None)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], 4)
+        self.assertEqual(question, None)
+
+    def test_search_questions(self):
+        res = self.client().post('/questions/search', json=self.new_search)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['total_questions'])   
    
 
 

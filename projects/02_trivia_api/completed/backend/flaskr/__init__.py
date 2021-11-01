@@ -3,7 +3,6 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
-
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
@@ -53,7 +52,7 @@ def create_app(test_config=None):
   def retrieve_categories():
     selection = Category.query.order_by(Category.id).all()
     current_categories = {i.id: i.type for i in selection}
-    #current_categories = [i.format() for i in selection]
+   # current_categories = [i.format() for i in selection]
 
     if len(current_categories) == 0:
       abort(404)
@@ -103,7 +102,7 @@ def create_app(test_config=None):
     try:
       question = Question.query.filter(Question.id == question_id).one_or_none()
 
-      if question is None:
+      if (question is None):
         abort(404)
 
       question.delete()
@@ -163,29 +162,108 @@ def create_app(test_config=None):
 
   TEST: When you submit a question on the "Add" tab, 
   the form will clear and the question will appear at the end of the last page
-  of the questions list in the "List" tab.  
+  of the questions list in the "List" tab.
+  NEEDS TEST  
   '''
+  @app.route('/questions/search', methods=['POST'])
+  def search_questions():
+    body = request.get_json()
+    search_term = body.get('searchTerm', 'None')
+    
+    try:
+      if search_term is not None:
+        selection = Question.query.order_by(Question.id)\
+               .filter(Question.question.ilike('%{}%'.format(search_term))).all()
+        if selection:
+           current_questions = paginate_questions(request, selection)
+        else:
+          current_questions = []
+
+        return jsonify({
+          'success': True,
+          'questions': current_questions,
+          'total_questions': len(selection)
+          })         
+      
+    except:
+      abort(422)
 
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
-  is a substring of the question. 
+  is a substring of the question.
+  TESTED NPM OK, NEED UNITTEST
 
   TEST: Search by any phrase. The questions list will update to include 
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  @app.route('/categories/<int:category_id>/questions', methods = ['GET'])
+  def get_by_category(category_id):
 
+    category = Category.query.filter(Category.id == category_id).one_or_none()
+
+    if (category is None):
+      abort(404)
+
+    try:
+
+      selection = Question.query.filter(Question.category == category_id).all()
+      current_questions = paginate_questions(request, selection)
+
+      return jsonify({
+        "success" : True,
+        "questions" : current_questions,
+        "current_category" : category.type,
+        "total_questions" : len(Question.query.all())
+      })
+
+    except:
+        abort(422)
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
-
+  TESTED NPM OK, NEED UNITTEST
   TEST: In the "List" tab / main screen, clicking on one of the 
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/quizzes', methods=['POST'])
+  def create_quiz():
+    body = request.get_json()
+    previous_questions = body.get('previous_questions', 'None')
+    quiz_category = body.get('quiz_category', 'None')
 
+    if ((previous_questions is None) or (quiz_category is None)):
+      abort(404)
+
+    if (quiz_category['id'] == 0):
+      all_questions = Question.query.all()
+    else:
+      all_questions = Question.query.filter(Question.category == quiz_category['id']).all()
+
+    new_questions = [i for i in all_questions if i.id not in previous_questions]
+    
+
+    if new_questions:
+      current_question = random.choice(new_questions)
+      question = current_question.format()
+    else:
+      question = None
+
+    
+    
+    try:
+
+      return jsonify({
+        'success': True,
+        #'previousQuestions': previous_questions,
+        'question': question,
+        })         
+      
+    except:
+      abort(422)
 
   '''
   @TODO: 
@@ -198,6 +276,24 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+      "success": False, 
+      "error": 204,
+      "message": "Bad Request"
+      }), 204
+
+
+  @app.errorhandler(404)
+  def not_found(error):
+    return jsonify({
+        "success": False, 
+        "error": 400,
+        "message": "No Content"
+        }), 400
+
+
   @app.errorhandler(404)
   def not_found(error):
     return jsonify({
