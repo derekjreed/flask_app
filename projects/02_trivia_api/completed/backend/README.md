@@ -76,11 +76,14 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
 
-
 ## API Reference
 
 
 ### <span style="background-color:red; color:white">`GET`</span>  /categories  - Retrieve categories from the database 
+
+
+### Parameters: 
+        None
 
 ### Curl
 ```python
@@ -104,7 +107,12 @@ curl -s -X GET http://127.0.0.1:5000/categories
 
 ```
 
+
+
 ### <span style="background-color:red; color:white">`GET`</span>  /questions  - Retrieve questions and categories from the database 
+
+### Parameters: 
+        None
 
 ### Curl
 ```python
@@ -201,9 +209,14 @@ curl -s -X GET http://127.0.0.1:5000/questions
 
 ```
 
+
 The returned questions can be paginated into pages of 10 and the ```/questions``` API Endpoint can be passed a page number as a parameter via the GET request thus:
 
+
 ### <span style="background-color:red; color:white">`GET`</span>  /questions?page=\<int\>  - Retrieve questions and categories from the database by page
+
+### Parameters: 
+        Page: page number as int
 
 ### Curl
 ```python
@@ -301,7 +314,12 @@ curl -s -X GET http://127.0.0.1:5000/questions?page=1
 
 ```
 
+
+
 ### <span style="background-color:blue; color:white">`DELETE`</span>  /questions/\<int:question_id\>  - Delete a question 
+
+### Parameters: 
+        question_id - the question id as an int
 
 ### Curl
 ```python
@@ -318,7 +336,16 @@ curl -s -X DELETE http://127.0.0.1:5000/questions/2
 ```
 
 
+
 ### <span style="background-color:green; color:white">`POST`</span>  /questions  - Add a new question to the database 
+
+### Parameters: 
+        From the request body
+            question - question as a string
+            answer - answer as a string
+            difficulty - difficulty rating as an int
+            category - category as an int
+
 
 ### Curl
 ```python
@@ -407,7 +434,16 @@ curl -s -X POST -H "Content-Type: application/json" -d '{"question": "Which film
 
 ```
 
+
+
 ### <span style="background-color:green; color:white">`POST`</span>  /questions/search  - Search for a question 
+
+### Parameters: 
+        From the request body
+            question - question as a string
+            answer - answer as a string
+            difficulty - difficulty rating as an int
+            category - category as an int
 
 ### Curl
 ```python
@@ -432,7 +468,12 @@ curl -s -X POST -H "Content-Type: application/json" --data '{"searchTerm": "beet
 
 ```
 
+
+
 ### <span style="background-color:red; color:white">`GET`</span>  /categories/\<int:category_id\>/questions  - Retrieve questions by category id
+
+### Parameters: 
+        category_id - id of the category as an int
 
 ### Curl
 ```python
@@ -480,7 +521,14 @@ curl -s -X GET http://127.0.0.1:5000/categories/1/questions
 
 ```
 
+
+
 ### <span style="background-color:green; color:white">`POST`</span>  /quizzes  - Create a quiz based on a category
+
+### Parameters: 
+        From the request body
+            previous_questions - a list of integers of question ids
+            quiz_category - list of dictionarys containing category id and type
 
 ### Curl
 ```python
@@ -503,27 +551,6 @@ curl -s -X POST -H "Content-Type: application/json" -d '{"previous_questions": [
 
 ```
 
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/api/v1.0/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/api/v1.0/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
-```
-
 
 ## Testing
 To run the tests, run
@@ -532,4 +559,5 @@ dropdb trivia_test
 createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
+
 ```
