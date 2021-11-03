@@ -362,14 +362,6 @@ def create_app(test_config=None):
             abort(422)
 
     '''Create error handlers for all expected errors'''
-    @app.errorhandler(204)
-    def no_content(error):
-        return jsonify({
-            "success": False,
-            "error": 204,
-            "message": "No Content"
-        }), 204
-
     @app.errorhandler(400)
     def bad_request(error):
         return jsonify({
