@@ -1,6 +1,5 @@
 import os
 import random
-
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +11,7 @@ QUESTIONS_PER_PAGE = 10
 def paginate_questions(request, selection):
     ''' paginates and formats questions
     Method: None
-    Parameters: 
+    Parameters:
     request - HTTP request structure
     selection - variable containing list Question objects
 
@@ -20,8 +19,8 @@ def paginate_questions(request, selection):
     to organise the questions per page. A slice of questions for the given
     page are then returned
 
-    Return: 
-    current_questions - A list of Question objects formatted as 
+    Return:
+    current_questions - A list of Question objects formatted as
     a list of dictionaries
     '''
     page = request.args.get('page', 1, type=int)
@@ -363,20 +362,20 @@ def create_app(test_config=None):
             abort(422)
 
     '''Create error handlers for all expected errors'''
-    @app.errorhandler(404)
-    def not_found(error):
+    @app.errorhandler(204)
+    def no_content(error):
         return jsonify({
             "success": False,
             "error": 204,
-            "message": "Bad Request"
+            "message": "No Content"
         }), 204
 
-    @app.errorhandler(404)
-    def not_found(error):
+    @app.errorhandler(400)
+    def bad_request(error):
         return jsonify({
             "success": False,
             "error": 400,
-            "message": "No Content"
+            "message": "Bad Request"
         }), 400
 
     @app.errorhandler(404)
@@ -404,7 +403,7 @@ def create_app(test_config=None):
         }), 422
 
     @app.errorhandler(500)
-    def unprocessable_entity(error):
+    def internal_error(error):
         return jsonify({
             "success": False,
             "error": 500,
