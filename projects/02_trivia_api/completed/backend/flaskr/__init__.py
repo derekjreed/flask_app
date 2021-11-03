@@ -55,7 +55,7 @@ def create_app(test_config=None):
         ''' Retrieve categories from the database
         Method: GET
         Endpoint: /categories
-        Parameters: 
+        Parameters:
         None
 
         The function queries the Category model for all categories.
@@ -63,7 +63,7 @@ def create_app(test_config=None):
         is created and this is returned as a jsonified response together
         with the length of the Category objects list.
 
-        Return: 
+        Return:
         success - True
         categories - list of dictionaries
         total_categories - number of Category objects as an int
@@ -85,19 +85,19 @@ def create_app(test_config=None):
         ''' Retrieve questions and categories from the database
         Method: GET
         Endpoint: /questions
-        Parameters: 
+        Parameters:
         None
 
         The function queries the Question model for all questions.
-        From the list of Question objects found they are passed to the 
-        paginate_questions function to be divided into pages. The function 
+        From the list of Question objects found they are passed to the
+        paginate_questions function to be divided into pages. The function
         then queries the Category model for all categories.
         From the list of Category objects found, a list of dictionaries
         is created. The success, list of questions, current category,
-        a list of all categories and a count of all questions are 
+        a list of all categories and a count of all questions are
         returned as a jsonified response
 
-        Return: 
+        Return:
         success - True
         questions - list of dictionaries of all the questions
         current_category - None
@@ -126,19 +126,19 @@ def create_app(test_config=None):
         ''' Delete a question
         Method: DELETE
         Endpoint: /questions/<int:question_id>
-        Parameters: 
+        Parameters:
         question_id - the question id as an int
 
         The function queries the Question model for all questions.
-        From the list of Question objects found they are passed to the 
-        paginate_questions function to be divided into pages. The function 
+        From the list of Question objects found they are passed to the
+        paginate_questions function to be divided into pages. The function
         then queries the Category model for all categories.
         From the list of Category objects found, a list of dictionaries
         is created. The success, list of questions, current category,
-        a list of all categories and a count of all questions are 
+        a list of all categories and a count of all questions are
         returned as a jsonified response
 
-        Return: 
+        Return:
         success - True
         questions - list of dictionaries of all the questions
         current_category - None
@@ -167,21 +167,21 @@ def create_app(test_config=None):
         ''' Add a new question to the database
         Method: POST
         Endpoint: /questions
-        Parameters: 
+        Parameters:
         From the request body
         question - question as a string
         answer - answer as a string
         difficulty - difficulty rating as an int
         category - category as an int
 
-        The function receives a question, answer, difficulty rating and 
-        category and instantiates a Question object from this data and 
+        The function receives a question, answer, difficulty rating and
+        category and instantiates a Question object from this data and
         inserts the data into the Question model. Then the Question model
         is queried for all questions which are sent to the paginate_questions
         function. The success, created question id, list of current questions
         and count of all questions are sent back as a jsonified response
 
-        Return: 
+        Return:
         success - True
         created - created question id as int
         questions - list of dictionaries of all the questions
@@ -217,7 +217,7 @@ def create_app(test_config=None):
         ''' Search for a question
         Method: POST
         Endpoint: /questions/search
-        Parameters: 
+        Parameters:
         From the request body
         question - question as a string
         answer - answer as a string
@@ -225,13 +225,13 @@ def create_app(test_config=None):
         category - category as an int
 
         The function receives a search string from the request body.
-        The string is searched for in the Question model (case 
+        The string is searched for in the Question model (case
         insensitive search). Each question which matches is placed in
         a list which is paginated else an empty list is created.
         The success, list of current questions matched and count of
         all questions are sent back as a jsonified response
 
-        Return: 
+        Return:
         success - True
         questions - list of dictionaries of all the questions
         total_questions - a count of all questions as an int
@@ -262,21 +262,21 @@ def create_app(test_config=None):
         ''' Retrieve questions by category id
         Method: GET
         Endpoint: /categories/<int:category_id>/questions
-        Parameters: 
+        Parameters:
         category_id - id of the category as an int
 
 
         The function receives a category id and queries the Category model
         filtering by id to get the category (or a None obj). All questions
         under that category are then extracted from the database and the
-        resulting list of Question objects is passed to the 
+        resulting list of Question objects is passed to the
         paginated_questions function which returns a page of quesions as
-        a list of dictionaries. The success, list of current questions, 
+        a list of dictionaries. The success, list of current questions,
         the current category previously passed in as a parameter and a
-        count of all the current questions are returned back as a 
+        count of all the current questions are returned back as a
         jsonified response.
 
-        Return: 
+        Return:
         success - True
         questions - list of dictionaries of all the questions
         current_category - A string representing the question category type
@@ -309,23 +309,23 @@ def create_app(test_config=None):
         ''' Creates a quiz based on a quiz category
         Method: POST
         Endpoint: /quizzes
-        Parameters: 
+        Parameters:
         From the request body
         previous_questions - a list of integers of question ids
         quiz_category - list of dictionarys containing categgory id and type
 
         The function receives a list of previous question ids, and a
         quiz_category list of dictionarys which contains the category id
-        and type. If the quiz_category id is '0'; all questions are 
+        and type. If the quiz_category id is '0'; all questions are
         selected, else only questions which match the quiz_category id
         are selected. These questions are then compared to all previously
         asked questions and only currently unasked questions are listed.
         A random question is taken from the unasked questions list and
         formated into a list of dictionaries. The success, and question
-        are sent back as a jsonified response. N.B. when the None obj 
+        are sent back as a jsonified response. N.B. when the None obj
         is sent back this tell the frontend no more questions exist.
 
-        Return: 
+        Return:
         success - True
         question - unasked question as list of dictionaries
         '''
