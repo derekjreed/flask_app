@@ -1,10 +1,11 @@
+import json
 import os
 import unittest
-import json
+
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import  setup_db, Question, Category
+from models import Category, Question, setup_db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -15,12 +16,13 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia_test"
-        self.database_path = "postgresql://{}:{}@{}/{}".format('postgres', 'password123', 'localhost:5432', self.database_name)
+        self.database_path = "postgresql://{}:{}@{}/{}".format(
+            'postgres', 'password123', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
         self.new_question = {
             'question': 'What is an allochthonous terrain?',
-            'answer' : 'A rock formation moved far from where it was originally formed',
+            'answer': 'A rock formation moved far from where it was originally formed',
             'difficulty': 5,
             'category': 1
         }
@@ -30,12 +32,11 @@ class TriviaTestCase(unittest.TestCase):
         }
 
         self.quizzes = {
-            'previous_questions': [2,3],
-            'quiz_category' : {
-            'id' : 1,
-            'type' : 'Science'
-        }}
-
+            'previous_questions': [2, 3],
+            'quiz_category': {
+                'id': 1,
+                'type': 'Science'
+            }}
 
         # binds the app to the current context
         with self.app.app_context():
@@ -43,7 +44,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         pass
@@ -52,6 +53,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+
     def test_get_paginated_questions(self):
         res = self.client().get('/questions?page=1')
         data = json.loads(res.data)
@@ -106,7 +108,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['total_questions'])
-   
+
     def test_create_quiz(self):
         res = self.client().post('/quizzes', json=self.quizzes)
         data = json.loads(res.data)
@@ -114,8 +116,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
         self.assertTrue(len(data["question"]))
-
-
 
 
 # Make the tests conveniently executable

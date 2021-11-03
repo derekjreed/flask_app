@@ -1,9 +1,10 @@
 import os
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import random
-from models import setup_db, Question, Category
+
+from flask import Flask, abort, jsonify, request
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from models import Category, Question, setup_db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -193,7 +194,6 @@ def create_app(test_config=None):
         new_answer = body.get('answer', None)
         new_difficulty = body.get('difficulty', None)
         new_category = body.get('category', None)
-
 
         try:
             question = Question(question=new_question, answer=new_answer,
