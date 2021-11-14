@@ -18,7 +18,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 '''
@@ -58,7 +58,8 @@ def get_drinks():
 
 
 @app.route('/drinks-detail', methods=['GET'])
-def get_drinks_detail():
+@requires_auth('get:drinks-detail')
+def get_drinks_detail(payload):
 
     try:
         drinks = Drink.query.all()
@@ -88,7 +89,8 @@ def get_drinks_detail():
 
 
 @app.route('/drinks', methods=['POST'])
-def post_drinks():
+@requires_auth('post:drinks')
+def post_drinks(payload):
 
     body = request.get_json()
 
@@ -129,7 +131,8 @@ def post_drinks():
 
 
 @app.route('/drinks/<int:id>', methods=['PATCH'])
-def patch_drinks(id):
+@requires_auth('patch:drinks')
+def patch_drinks(payload, id):
 
     body = request.get_json()
     drink = Drink.query.filter(Drink.id == id).one_or_none()
@@ -177,7 +180,8 @@ def patch_drinks(id):
 
 
 @app.route('/drinks/<int:id>', methods=['DELETE'])
-def delete_drinks(id):
+@requires_auth('delete:drinks')
+def delete_drinks(payload, id):
     drink = Drink.query.filter(Drink.id == id).one_or_none()
     if drink == None:
         abort(404)
