@@ -231,7 +231,7 @@ def unprocessable(error):
 
 
 @app.errorhandler(404)
-def unprocessable(error):
+def notfound(error):
     return jsonify({
         "success": False,
         "error": 404,
