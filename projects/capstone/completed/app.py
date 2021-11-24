@@ -1,14 +1,19 @@
 import os
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
+
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+
+from models import Actor, Movie, setup_db
+
 
 def create_app(test_config=None):
-  # create and configure the app
-  app = Flask(__name__)
-  CORS(app)
+    # create and configure the app
+    app = Flask(__name__)
+    CORS(app)
 
-  return app
+    return app
+
 
 APP = create_app()
 
