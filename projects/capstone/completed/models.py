@@ -47,7 +47,12 @@ def db_drop_and_create_all():
     actor2.insert()
     actor3 = Actor(name='Clarissa Hunt', age=38, gender='Female')
     actor3.insert()
-    movie1 = Movie(title='Time to go', release_date='2019-05-21T21')
+    movie1 = Movie(title='Time to go', release_date='2022-01-01')
+    movie1.insert()
+    movie2 = Movie(title='Time to come', release_date='2023-04-01')
+    movie2.insert()
+    movie3 = Movie(title='Time to stay', release_date='2022-05-01')
+    movie3.insert()
 
 
 '''
