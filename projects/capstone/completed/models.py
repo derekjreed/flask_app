@@ -27,7 +27,27 @@ def setup_db(app, database_path=DB_PATH):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
+    # db.create_all()
+
+
+'''
+db_drop_and_create_all()
+    drops the database tables and starts fresh
+    can be used to initialize a clean database
+'''
+
+
+def db_drop_and_create_all():
+    db.drop_all()
     db.create_all()
+    # Get some dummy data into the db
+    actor1 = Actor(name='Derek Rink', age=52, gender='Male')
+    actor1.insert()
+    actor2 = Actor(name='Jake Pound', age=32, gender='Male')
+    actor2.insert()
+    actor3 = Actor(name='Clarissa Hunt', age=38, gender='Female')
+    actor3.insert()
+    movie1 = Movie(title='Time to go', release_date='2019-05-21T21')
 
 
 '''
@@ -38,9 +58,9 @@ Movie
 class Movie(db.Model):
     __tablename__ = 'Movie'
 
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(120), nullable=False)
-    release_date = db.Column(db.DateTime, nullable=False)
+    id = Column(Integer, primary_key=True)
+    title = Column(String(120), nullable=False)
+    release_date = Column(DateTime, nullable=False)
 
     def __repr__(self):
         return f'<Movie ID: {self.id}, title: {self.title}, release_date: {self.release_date}>'
@@ -76,10 +96,10 @@ Actor
 class Actor(db.Model):
     __tablename__ = 'Actor'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
-    age = db.Column(db.Integer, nullable=False)
-    gender = db.Column(db.String(7), nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(120), nullable=False)
+    age = Column(Integer, nullable=False)
+    gender = Column(String(7), nullable=False)
 
     def __repr__(self):
         return f'<Actor ID: {self.id}, name: {self.name}, age: {self.age}, gender: {self.gender}>'
