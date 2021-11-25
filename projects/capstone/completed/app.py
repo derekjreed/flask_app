@@ -10,6 +10,7 @@ from models import Actor, Movie, setup_db
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
+    setup_db(app)
     CORS(app)
 
     return app
