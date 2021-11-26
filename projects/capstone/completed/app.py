@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from models import Actor, Movie, setup_db
 
 
-ITEMS_PER_PAGE = 2
+ITEMS_PER_PAGE = 5
 
 
 def paginate_items(request, selection):
@@ -49,6 +49,10 @@ def create_app(test_config=None):
                              'GET, POST, PATCH, DELETE, OPTION')
         return response
 
+#
+# Actor APIs
+#
+
     @app.route('/actors', methods=['GET'])
     def get_actors():
         ''' Get actors from the database
@@ -67,7 +71,7 @@ def create_app(test_config=None):
         '''
         selection = Actor.query.order_by(Actor.id).all()
         current_actors = paginate_items(request, selection)
-        #current_actors = {i.id: i.type for i in selection}
+        # current_actors = {i.id: i.type for i in selection}
 
         if len(current_actors) == 0:
             abort(404)
@@ -117,7 +121,7 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
-    def delete_question(actor_id):
+    def delete_actor(actor_id):
         ''' Delete a actor
         Method: DELETE
         Endpoint: /actors/<int:actor_id>
@@ -143,7 +147,312 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'deleted': actor_id
-            })
+            }), 200
+
+        except:
+            abort(422)
+
+    @app.route('/actors', methods=['POST'])
+    def create_actor():
+        ''' Add a new question to the database
+        Method: POST
+        Endpoint: /actors
+        Parameters:
+        From the request body
+        question - question as a string
+        answer - answer as a string
+        difficulty - difficulty rating as an int
+        category - category as an int
+        The function receives a question, answer, difficulty rating and
+        category and instantiates a Question object from this data and
+        inserts the data into the Question model. Then the Question model
+        is queried for all actors which are sent to the paginate_actors
+        function. The success, created question id, list of current actors
+        and count of all actors are sent back as a jsonified response
+        Return:
+        success - True
+        created - created question id as int
+        actors - list of dictionaries of all the actors
+        total_actors - a count of all actors as an int
+        '''
+        body = request.get_json()
+
+        new_name = body.get('name', None)
+        new_age = body.get('age', None)
+        new_gender = body.get('gender', None)
+
+        try:
+            actor = Actor(name=new_name, age=new_age,
+                          gender=new_gender)
+            actor.insert()
+
+            selection = Actor.query.order_by(Actor.id).all()
+            current_actors = paginate_items(request, selection)
+
+            return jsonify({
+                'success': True,
+                'created': actor.id,
+                'actors': current_actors,
+                'total_questions': len(Actor.query.all())
+            }), 200
+
+        except:
+            abort(422)
+
+    @app.route('/actors/<int:actor_id>', methods=['PATCH'])
+    def patch_actors(actor_id):
+        ''' Patch for a question
+        Method: POST
+        Endpoint: /actors/<int:actor_id>
+        Parameters:
+        From the request body
+        actor - question as a string
+        age - answer as a string
+        gender - difficulty rating as an int
+        The function receives a search string from the request body.
+        The string is searched for in the Question model (case
+        insensitive search). Each question which matches is placed in
+        a list which is paginated else an empty list is created.
+        The success, list of current actors matched and count of
+        all actors are sent back as a jsonified response
+        Return:
+        success - True
+        actors - list of dictionaries of all the actors
+        total_actors - a count of all actors as an int
+        '''
+        body = request.get_json()
+
+        new_name = body.get('name', None)
+        new_age = body.get('age', None)
+        new_gender = body.get('gender', None)
+
+        if new_name is None and new_age is None and new_gender is None:
+            abort(422)
+
+        try:
+
+            actor = Actor.query.filter(
+                Actor.id == actor_id).one_or_none()
+
+            if new_name is not None:
+                actor.name = new_name
+            if new_age is not None:
+                actor.age = new_age
+            if new_gender is not None:
+                actor.gender = new_gender
+
+            actor.update()
+
+            selection = Actor.query.order_by(Actor.id).all()
+            current_actors = paginate_items(request, selection)
+
+            return jsonify({
+                'success': True,
+                'actors': current_actors,
+                'total_questions': len(Actor.query.all())
+            }), 200
+
+        except:
+            abort(422)
+
+
+#
+# Movie APIs
+#
+
+
+    @app.route('/movies', methods=['GET'])
+    def get_movies():
+        ''' Get movies from the database
+        Method: GET
+        Endpoint: /movies
+        Parameters:
+        None
+        The function queries the Movie model for all movies.
+        From the list of Movie objects found, a list of dictionaries
+        is created and this is returned as a jsonified response together
+        with the length of the Movie objects list.
+        Return:
+        success - True
+        movie - list of dictionaries
+        total_movie - number of Movie objects as an int
+        '''
+        selection = Movie.query.order_by(Movie.id).all()
+        current_movies = paginate_items(request, selection)
+        # current_movies = {i.id: i.type for i in selection}
+
+        if len(current_movies) == 0:
+            abort(404)
+
+        return jsonify({
+            "success": True,
+            "movies": current_movies,
+            "total_movies": len(Movie.query.all())
+        }), 200
+
+    @app.route('/movies/<int:movie_id>', methods=['GET'])
+    def get_movie(movie_id):
+        ''' Retrieve movie by id
+        Method: GET
+        Endpoint: /movies/<int:movie_id
+        Parameters:
+        movie_id - id of the movie as an int
+        The function receives a movie id and queries the Movie model
+        filtering by id to get the actor (or a None obj). All questions
+        under that actor are then extracted from the database and the
+        resulting list of Question objects is passed to the
+        paginated_questions function which returns a page of quesions as
+        a list of dictionaries. The success, list of current questions,
+        the current actor previously passed in as a parameter and a
+        count of all the current questions are returned back as a
+        jsonified response.
+        Return:
+        success - True
+        movie - 
+        current_actor - A string representing the question actor type
+        total_questions - a count of all questions as an int
+        '''
+        movie = Movie.query.filter(
+            Movie.id == movie_id).one_or_none()
+
+        if (movie is None):
+            abort(404)
+
+        try:
+
+            return jsonify({
+                "success": True,
+                "movie": movie.format(),
+            }), 200
+
+        except:
+            abort(422)
+
+    @app.route('/movies/<int:movie_id>', methods=['DELETE'])
+    def delete_movie(movie_id):
+        ''' Delete a movie
+        Method: DELETE
+        Endpoint: /movies/<int:movie_id>
+        Parameters:
+        movie_id - the movie id as an int
+        The function queries the Movie model for movie_id.
+        If the movie id exists the movie entry is deleted.
+        The success and deleted movie id are
+        returned as a jsonified response.
+        Return:
+        success - True
+        deleted - movie_id
+        '''
+        try:
+            movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
+
+            if (movie is None):
+                abort(404)
+
+            movie.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': movie_id
+            }), 200
+
+        except:
+            abort(422)
+
+    @app.route('/movies', methods=['POST'])
+    def create_movie():
+        ''' Add a new question to the database
+        Method: POST
+        Endpoint: /movies
+        Parameters:
+        From the request body
+        question - question as a string
+        answer - answer as a string
+        difficulty - difficulty rating as an int
+        category - category as an int
+        The function receives a question, answer, difficulty rating and
+        category and instantiates a Question object from this data and
+        inserts the data into the Question model. Then the Question model
+        is queried for all movies which are sent to the paginate_movies
+        function. The success, created question id, list of current movies
+        and count of all movies are sent back as a jsonified response
+        Return:
+        success - True
+        created - created question id as int
+        movies - list of dictionaries of all the movies
+        total_movies - a count of all movies as an int
+        '''
+        body = request.get_json()
+
+        new_title = body.get('title', None)
+        new_release_date = body.get('release_date', None)
+
+        try:
+            movie = Movie(title=new_title, release_date=new_release_date)
+            movie.insert()
+
+            selection = Movie.query.order_by(Movie.id).all()
+            current_movies = paginate_items(request, selection)
+
+            return jsonify({
+                'success': True,
+                'created': movie.id,
+                'movies': current_movies,
+                'total_questions': len(Movie.query.all())
+            }), 200
+
+        except:
+            abort(422)
+
+    @app.route('/movies/<int:movie_id>', methods=['PATCH'])
+    def patch_movies(movie_id):
+        ''' Patch for a question
+        Method: POST
+        Endpoint: /movies/<int:movie_id>
+        Parameters:
+        From the request body
+        movie - question as a string
+        age - answer as a string
+        gender - difficulty rating as an int
+        The function receives a search string from the request body.
+        The string is searched for in the Question model (case
+        insensitive search). Each question which matches is placed in
+        a list which is paginated else an empty list is created.
+        The success, list of current movies matched and count of
+        all movies are sent back as a jsonified response
+        Return:
+        success - True
+        movies - list of dictionaries of all the movies
+        total_movies - a count of all movies as an int
+        '''
+        body = request.get_json()
+
+        new_title = body.get('title', None)
+        new_release_date = body.get('release_date', None)
+
+        if new_title is None and new_release_date is None:
+            abort(422)
+
+        try:
+
+            movie = Movie.query.filter(
+                Movie.id == movie_id).one_or_none()
+
+            if new_title is not None:
+                movie.title = new_title
+            if new_release_date is not None:
+                movie.release_date = new_release_date
+
+            movie.update()
+
+            selection = Movie.query.order_by(Movie.id).all()
+            current_movies = paginate_items(request, selection)
+
+            return jsonify({
+                'success': True,
+                'movies': current_movies,
+                'total_questions': len(Movie.query.all())
+            }), 200
 
         except:
             abort(422)
@@ -164,6 +473,22 @@ def create_app(test_config=None):
             "error": 404,
             "message": "Resource not found"
         }), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "Method Not Allowed"
+        }), 405
+
+    @app.errorhandler(422)
+    def unprocessable_entity(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "Unprocessable Entity"
+        }), 422
 
     return app
 
