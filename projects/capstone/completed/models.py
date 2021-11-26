@@ -40,6 +40,9 @@ db_drop_and_create_all()
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
+
+
+def create_dummy_data():
     # Get some dummy data into the db
     actor1 = Actor(name='Derek Rink', age=52, gender='Male')
     actor1.insert()
