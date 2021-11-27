@@ -110,9 +110,13 @@ ALTER TABLE ONLY public."Movie" ALTER COLUMN id SET DEFAULT nextval('public."Mov
 --
 
 COPY public."Actor" (id, name, age, gender) FROM stdin;
-1	Derek Rink	52	Male
 2	Jake Pound	32	Male
 3	Clarissa Hunt	38	Female
+4	Derek Rink	52	Male
+5	Jake Pound	32	Male
+6	Clarissa Hunt	38	Female
+7	Joe Bloggs	40	Male
+1	Jimmy Bloggs	40	Male
 \.
 
 
@@ -121,8 +125,12 @@ COPY public."Actor" (id, name, age, gender) FROM stdin;
 --
 
 COPY public."Movie" (id, title, release_date) FROM stdin;
-1	Time to go	2022-01-01 00:00:00
 2	Time to come	2023-04-01 00:00:00
+4	Time to go	2022-01-01 00:00:00
+5	Time to come	2023-04-01 00:00:00
+6	Time to stay	2022-05-01 00:00:00
+7	This will work	2022-03-03 00:00:00
+1	This will work too	2022-04-03 00:00:00
 \.
 
 
@@ -130,14 +138,14 @@ COPY public."Movie" (id, title, release_date) FROM stdin;
 -- Name: Actor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Actor_id_seq"', 3, true);
+SELECT pg_catalog.setval('public."Actor_id_seq"', 7, true);
 
 
 --
 -- Name: Movie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public."Movie_id_seq"', 3, true);
+SELECT pg_catalog.setval('public."Movie_id_seq"', 7, true);
 
 
 --

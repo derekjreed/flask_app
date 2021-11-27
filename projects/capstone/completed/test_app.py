@@ -84,7 +84,7 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource not found')
 
-    def test_8_delete_actors(self):
+    def test_3_delete_actors(self):
         res = self.client().delete('/actors/1')
         data = json.loads(res.data)
 
@@ -124,15 +124,15 @@ class AgencyTestCase(unittest.TestCase):
         self.assertTrue(data['message'], 'Unprocessable Entity')
 
     def test_7_patch_actor_correct_data(self):
-        res = self.client().patch('/actors/1', json=self.actor_partial_data)
+        res = self.client().patch('/actors/2', json=self.actor_partial_data)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['actors'])
 
-    def test_3_patch_actor_no_data(self):
-        res = self.client().patch('/actors/1', json=self.actor_no_data)
+    def test_8_patch_actor_no_data(self):
+        res = self.client().patch('/actors/2', json=self.actor_no_data)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
@@ -160,7 +160,7 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource not found')
 
-    def test_15_delete_movies(self):
+    def test_11_delete_movies(self):
         res = self.client().delete('/movies/1')
         data = json.loads(res.data)
 
@@ -199,8 +199,8 @@ class AgencyTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertTrue(data['message'], 'Unprocessable Entity')
 
-    def test_11_patch_movie_correct_data(self):
-        res = self.client().patch('/movies/1', json=self.movie_partial_data)
+    def test_15_patch_movie_correct_data(self):
+        res = self.client().patch('/movies/2', json=self.movie_partial_data)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -208,7 +208,7 @@ class AgencyTestCase(unittest.TestCase):
         self.assertTrue(data['movies'])
 
     def test_16_patch_movie_no_data(self):
-        res = self.client().patch('/movies/1', json=self.movie_no_data)
+        res = self.client().patch('/movies/2', json=self.movie_no_data)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 422)
