@@ -193,7 +193,7 @@ def create_app(test_config=None):
                 'success': True,
                 'created': actor.id,
                 'actors': current_actors,
-                'total_questions': len(Actor.query.all())
+                'total_actors': len(Actor.query.all())
             }), 200
 
         except:
@@ -249,7 +249,7 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'actors': current_actors,
-                'total_questions': len(Actor.query.all())
+                'total_actors': len(Actor.query.all())
             }), 200
 
         except:
