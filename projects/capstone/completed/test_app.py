@@ -22,12 +22,20 @@ class AgencyTestCase(unittest.TestCase):
         cls.database_path = "postgresql://{}:{}@{}/{}".format(
             'postgres', 'password123', 'localhost:5432', cls.database_name)
         setup_db(cls.app, cls.database_path)
-        db_create_all()
         db_drop_and_create_all()
         create_dummy_data()
+
+        # binds the app to the current context
+        with cls.app.app_context():
+            cls.db = SQLAlchemy()
+            cls.db.init_app(cls.app)
+            # create all tables
+
         return super().setUpClass()
 
     def setUp(self):
+        """Executed before each test"""
+
         """Define test variables and initialize app."""
 
         self.actor_correct_data = {
@@ -55,12 +63,6 @@ class AgencyTestCase(unittest.TestCase):
 
         self.movie_no_data = {
         }
-
-        # binds the app to the current context
-        with self.app.app_context():
-            self.db = SQLAlchemy()
-            self.db.init_app(self.app)
-            # create all tables
 
     def tearDown(self):
         """Executed after reach test"""
