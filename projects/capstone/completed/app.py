@@ -2,10 +2,10 @@ import os
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 
+from auth import AuthError, requires_auth
 from models import Actor, Movie, setup_db
-
 
 ITEMS_PER_PAGE = 5
 
@@ -54,7 +54,8 @@ def create_app(test_config=None):
 #
 
     @app.route('/actors', methods=['GET'])
-    def get_actors():
+    @requires_auth('get:actors')
+    def get_actors(payload):
         ''' Get actors from the database
         Method: GET
         Endpoint: /actors
@@ -83,7 +84,8 @@ def create_app(test_config=None):
         }), 200
 
     @app.route('/actors/<int:actor_id>', methods=['GET'])
-    def get_actor(actor_id):
+    @requires_auth('get:actors')
+    def get_actor(payload, actor_id):
         ''' Retrieve actor by id
         Method: GET
         Endpoint: /actors/<int:actor_id
@@ -121,7 +123,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
-    def delete_actor(actor_id):
+    @requires_auth('delete:actors')
+    def delete_actor(payload, actor_id):
         ''' Delete a actor
         Method: DELETE
         Endpoint: /actors/<int:actor_id>
@@ -153,7 +156,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/actors', methods=['POST'])
-    def create_actor():
+    @requires_auth('post:actors')
+    def create_actor(payload):
         ''' Add a new question to the database
         Method: POST
         Endpoint: /actors
@@ -200,7 +204,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
-    def patch_actors(actor_id):
+    @requires_auth('patch:actors')
+    def patch_actors(payload, actor_id):
         ''' Patch for a question
         Method: POST
         Endpoint: /actors/<int:actor_id>
@@ -260,9 +265,9 @@ def create_app(test_config=None):
 # Movie APIs
 #
 
-
     @app.route('/movies', methods=['GET'])
-    def get_movies():
+    @requires_auth('get:movies')
+    def get_movies(payload):
         ''' Get movies from the database
         Method: GET
         Endpoint: /movies
@@ -291,7 +296,8 @@ def create_app(test_config=None):
         }), 200
 
     @app.route('/movies/<int:movie_id>', methods=['GET'])
-    def get_movie(movie_id):
+    @requires_auth('get:movies')
+    def get_movie(payload, movie_id):
         ''' Retrieve movie by id
         Method: GET
         Endpoint: /movies/<int:movie_id
@@ -329,7 +335,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/movies/<int:movie_id>', methods=['DELETE'])
-    def delete_movie(movie_id):
+    @requires_auth('delete:movies')
+    def delete_movie(payload, movie_id):
         ''' Delete a movie
         Method: DELETE
         Endpoint: /movies/<int:movie_id>
@@ -360,7 +367,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/movies', methods=['POST'])
-    def create_movie():
+    @requires_auth('post:movies')
+    def create_movie(payload):
         ''' Add a new question to the database
         Method: POST
         Endpoint: /movies
@@ -405,7 +413,8 @@ def create_app(test_config=None):
             abort(422)
 
     @app.route('/movies/<int:movie_id>', methods=['PATCH'])
-    def patch_movies(movie_id):
+    @requires_auth('patch:movies')
+    def patch_movies(payload, movie_id):
         ''' Patch for a question
         Method: POST
         Endpoint: /movies/<int:movie_id>
@@ -489,6 +498,12 @@ def create_app(test_config=None):
             "error": 422,
             "message": "Unprocessable Entity"
         }), 422
+
+    @app.errorhandler(AuthError)
+    def unauthorized(ex):
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
 
     return app
 
