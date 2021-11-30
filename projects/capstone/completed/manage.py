@@ -1,7 +1,7 @@
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
-from app import create_app, APP
+from app import APP
 from models import db
 # Script can be used in Heroku/Linux envs for db model
 # creation

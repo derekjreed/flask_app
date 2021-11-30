@@ -97,7 +97,7 @@ class AgencyTestCase(unittest.TestCase):
         self.assertTrue(data['total_actors'])
         self.assertTrue(len(data['actors']))
 
-    def test_2_get_paginated_actors_valid_perm(self):
+    def test_2_get_paginated_actors_diff_valid_perm(self):
         res = self.client().get('/actors?page=1',
                                 headers={"Authorization": CASTING_DIRECTOR})
         data = json.loads(res.data)
@@ -227,7 +227,7 @@ class AgencyTestCase(unittest.TestCase):
         self.assertTrue(data['total_movies'])
         self.assertTrue(len(data['movies']))
 
-    def test_21_get_paginated_movies_valid_perm(self):
+    def test_21_get_paginated_movies_diff_valid_perm(self):
         res = self.client().get('/movies?page=1',
                                 headers={"Authorization": CASTING_DIRECTOR})
         data = json.loads(res.data)
