@@ -48,7 +48,7 @@ Get request response returns a json payload containing
 ```
 __Note:__ The output for GET with multiple records is paginated (5 records per page). To GET each page use the query URL parameter to view pages (e.g. ?page=integer)
 #### `Page query`
-```json
+```bash
 curl -s -H "Authorization: ${EXECUTIVE_PRODUCE}" -X GET https://capstone-agency-api33.herokuapp.com/actors?page=2
 {
   "actors": [
@@ -206,7 +206,7 @@ Post request response returns a json payload containing
 ```
 
 #### `Created actor`
-```json
+```bash
 curl -s -H "Authorization: ${TOKEN}" -X GET https://capstone-agency-api33.herokuapp.com/actors/9
 {
   "actor": {
@@ -346,7 +346,7 @@ Get request response returns a json payload containing
 
 __Note:__ The output for GET with multiple records is paginated (5 records per page). To GET each page use the query URL parameter to view pages (e.g. ?page=integer)
 #### `Page query`
-```json
+```bash
 curl -s -H "Authorization: ${EXECUTIVE_PRODUCE}" -X GET https://capstone-agency-api33.herokuapp.com/movies?page=2
 {
   "movies": [
@@ -493,7 +493,7 @@ Post request response returns a json payload containing
 ```
 
 #### `Created movie`
-```json
+```bash
 curl -s -H "Authorization: ${EXECUTIVE_PRODUCE}" -X GET https://capstone-agency-api33.herokuapp.com/movies/8
 {
   "movie": {
