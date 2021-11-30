@@ -1,14 +1,206 @@
 ## Content
 
-1. [1](#1)
-2. [2](#2)
-3. [API Reference](#api-ref)
-4. [3](#3)
+1. [Project Motivation](#proj-ref)
+2. [Clone Git Repo](#git-ref)
+3. [Setting Up and Configuring Python](#python-ref)
+3. [Setting Up and Configuring the Database](#db-ref)
+4. [How to Start Up a Standalone App](#standalone-ref)
+5. [How to Deploy in Heroku](#heroku-ref)
+6. [Authentication and authorisation](#auth-ref)
+7. [API Reference](#api-ref)
+8. [Acknowledgements](#ack-ref)
+
+
+
+<a name="proj-ref"></a>
+## Project Motivation
+The project is the fifth and final project which 'caps' off all the work I have covered in the Full Stack Web developer 
+Udacity Nano-degree. The course covers:
+- Database design and usage
+- Web Application design using CRUD
+- Creating API's using Flask
+- API testing and documentation
+- Authorisation and authentication
+- Kubernetes, containerisation and cloud deployment
+- Putting this all together from scratch in a capstone project
+
+The final project is based around an acting agency which looks after actors and finds roles in movies. The goal
+was to create a database of actors and movies and to be able to use ***GET/DELETE/POST*** and ***PATCH*** API's to access and manipulate
+the data via HTTP. The ficticious agency has a hierarchy of 3 users, each with varying and increasing access. This access
+is controlled via Json Web Tokens (JWT) which have permission claims attached to them. Whilst creating the database, the API's
+and setting up the Authentcation and authentcated users, testing scripts were devised and written to test the application; through
+both the python unittest library and Postman. Finally the application was deployed in Heroku where final testing was carried out,
+before the documentation was produced to allow others to look over this work.
+
+<a name="git-ref"></a>
+## Clone Git Repo
+
+Firstly clone the repo using [this link](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+
+<a name="python-ref"></a>
+## Setting Up and Configuring Python
+
+It is best to segregate your python environment using virtual environments
+
+__Using a Linux shell and windows powershell__
+```bash
+pip install virtualenv
+python3 -m venv env
+source env/bin/activate
+
+with windows
+.\env\Script\activate
+```
+
+
+<a name="db-ref"></a>
+## Setting Up and Configuring the Database
+
+Certain database variables can be setup in the shell where you execute the flask application, these can be found in models.py. Below is an example setup
+using the default values setout in models.py. Doing this allows you to more securely use sensitive data without exposing it to 'the world'.
+
+```bash
+export DB_HOST='127.0.0.1:5432')
+export DB_USER='postgres')
+export DB_PASSWORD='password123')
+export DB_NAME='agency')
+````
+
+To set the database up first create the database for this app using postgresql commands dropdb and createdb. ***N.B the example is using
+the Linux Bash shell, the database user is postgres and the database is called agency***
+
+```bash
+dropdb -U postgres agency
+createdb -U postgres agency
+```
+
+
+There are a few files which are used to setup and model the data in the database.
+- models.py this python library is used to setup the postgresql database and also contains some 'helper' functions to drop and create the
+database tables and to create dummy data to test against. These helper functions include:
+  - __db_create_all()__ - This will create the Actor and Movietables in the agency database
+  - __db_drop_and_create_all()__ - This will drop and create the database tables and setup the datatypes for each column
+  - __create_dummy_data()__ - This will create dummy data for testing
+
+- setup.sh this is a bash script which can be used once the database has been created as setout above.
+
+```bash
+bash setup.sh
+```
+
+Else on windows, after setting up you python environment, you can open powershell in the repo's root dir and run
+
+```bash
+$env:FLASK_ENV = "development"
+$env:FLASK_APP = "app"
+flask shell
+from models import setup_db, Actor, Movie, db_create_all, db_drop_and_create_all, create_dummy_data
+db_drop_and_create_all()
+create_dummy_data()
+```
+
+Below shows the creation of the tables and dummy data in powershell
+
+![Creating the database](.stuff/database_creation.JPG)
+
+<a name="standalone-ref"></a>
+## How to Start Up a Standalone App
+
+First setup your python environment, make sure you are in the root of the repo, where the app.py is and then run
+
+```bash
+export FLASK_ENV="development"
+export FLASK_APP="app"
+flask run
+```
+
+On windows, you can run the flask app using powershell as below
+
+![Running the flask app](.stuff/flask_run.JPG)
+
+
+
+<a name="heroku-ref"></a>
+## How to Deploy in Heroku
+
+The steps for deploying to Heroku are:
+- Create a flask app and push to a gitHub repo
+- Make sure the requirements.txt is upto date with your app environment
+- Create a Procfile which contains ***web: gunicorn app:APP*** push to repo
+    - web is the Heroku process
+    - gunicorn is the wsgi webserver you want to run
+    - app is the name of the file containing the app (app.py)
+    - APP is the app in the app.py file
+- Login to Heroku and create a new app (press new button) ![Create new app](.stuff/heroku_new_app.JPG)
+
+- Configure Heroku to pull the gitHub repo (and manually pull to start the process) ![Configure deploy](.stuff/heroku_config_deploy.JPG)
+
+- Create a Postgresql database (the full connection strng is created including a random name for the database) ![Configure database](.stuff/heroku_database.JPG)
+
+- Look in the Settings > ConfigVars to find the DATABASE_URL and use this for the DB_PATH in models.py
+
+- In the More > Run console run bash setup.sh. This will create the databse tables and populate the database with data  
+
+- Check in More > View Logs to see what state the Application is in ![View logs](.stuff/Healthy_app.JPG)
+
+- When the application is up test using Postman and valid JWTs
+
+
+<a name="auth-ref"></a>
+## Authentication and authorisation
+
+The Authentication and authorisation was configured through a third party site [Auth0](https://auth0.com/). The site allows for a login facility to create a JWT with approval claims which can then be used by the application once configured. The Authentication and authorisation config is setup in auth.py and is then utilised in app.py using ***@requires_auth()*** and the payload passed into the function representing each API endpoint. The project involves 3 separate authorisation levels (roles). These are divided by which API's they can access. The
+approval claims are found in the payload of the JWT. The roles are and their associated approval claims are:
+
+### Casting Assistant
+- Can view actors and movies
+
+```bash
+"permissions": [
+"get:actors",
+"get:movies"
+]
+```
+
+### Casting Director
+- All permissions a Casting Assistant has and…
+- Add or delete an actor from the database
+- Modify actors or movies
+
+```bash
+"permissions": [
+"delete:actors",
+"get:actors",
+"get:movies",
+"patch:actors",
+"patch:movies",
+"post:actors"
+]
+```
+
+### Executive Producer
+- All permissions a Casting Director has and…
+- Add or delete a movie from the database
+
+```bash
+"permissions": [
+"delete:actors",
+"delete:movies",
+"get:actors",
+"get:movies",
+"patch:actors",
+"patch:movies",
+"post:actors",
+"post:movies"
+]
+```
 
 
 
 
 
+
+<a name="api-ref"></a>
 ## API Reference
 
 
@@ -578,3 +770,12 @@ Post request response returns a json payload containing
 
 
 ```
+
+
+
+<a name="ack-ref"></a>
+## Acknowledgements
+
+I would like to thank all the people at Udacity especially the support guys for their hardwork and help. Miguel Grinberg for all the useful information
+he has compiled for the flask community. Anthony Herbert at https://prettyprinted.com/ for all his youtube content which was very helpful
+for this course. Finally, thank you to the opensource community for being open to giving stuff away for free...this is a great concept.
