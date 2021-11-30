@@ -69,7 +69,6 @@ def create_app(test_config=None):
         '''
         selection = Actor.query.order_by(Actor.id).all()
         current_actors = paginate_items(request, selection)
-        # current_actors = {i.id: i.type for i in selection}
 
         if len(current_actors) == 0:
             abort(404)
@@ -89,19 +88,16 @@ def create_app(test_config=None):
         Parameters:
         actor_id - id of the actor as an int
         The function receives a actor id and queries the Actor model
-        filtering by id to get the actor (or a None obj). All questions
-        under that actor are then extracted from the database and the
-        resulting list of Question objects is passed to the
-        paginated_questions function which returns a page of quesions as
-        a list of dictionaries. The success, list of current questions,
-        the current actor previously passed in as a parameter and a
-        count of all the current questions are returned back as a
-        jsonified response.
+        filtering by id to get the actor (or a None obj). All attributes
+        connected to that actor are then extracted from the database and the
+        resulting list of Actors objects is formatted by the models 
+        class method .format() which returns the data as
+        a dictionary. The success and dictionary of current actors attributes are 
+        passed in as a parameter as a jsonified response.
         Return:
         success - True
-        questions - list of dictionaries of all the questions
-        current_actor - A string representing the question actor type
-        total_questions - a count of all questions as an int
+        actors - dictionary of all the actor id attributes
+
         '''
         actor = Actor.query.filter(
             Actor.id == actor_id).one_or_none()
@@ -155,25 +151,25 @@ def create_app(test_config=None):
     @app.route('/actors', methods=['POST'])
     @requires_auth('post:actors')
     def create_actor(payload):
-        ''' Add a new question to the database
+        ''' Add a new actor to the database
         Method: POST
         Endpoint: /actors
         Parameters:
         From the request body
-        question - question as a string
-        answer - answer as a string
-        difficulty - difficulty rating as an int
-        category - category as an int
-        The function receives a question, answer, difficulty rating and
-        category and instantiates a Question object from this data and
-        inserts the data into the Question model. Then the Question model
-        is queried for all actors which are sent to the paginate_actors
-        function. The success, created question id, list of current actors
+        name - name as a string
+        age - age as an int
+        gender - gender is a string
+
+        The function receives a name, age, gender and instantiates an Actor object
+        from this data and
+        inserts the data into the Actor model. Then the Actor model
+        is queried for all actors which are sent to the paginate_items
+        function. The success, created actor id, list of current actors
         and count of all actors are sent back as a jsonified response
         Return:
         success - True
-        created - created question id as int
-        actors - list of dictionaries of all the actors
+        created - created actor id as int
+        actors - list of dictionaries of all the actors (paginated)
         total_actors - a count of all actors as an int
         '''
         body = request.get_json()
@@ -203,20 +199,23 @@ def create_app(test_config=None):
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
     @requires_auth('patch:actors')
     def patch_actors(payload, actor_id):
-        ''' Patch for a question
-        Method: POST
+        ''' Patch for a actor
+        Method: PATCH
         Endpoint: /actors/<int:actor_id>
         Parameters:
+        actor_id - actor id as an int
         From the request body
-        actor - question as a string
+        name - name as a string
         age - answer as a string
         gender - difficulty rating as an int
-        The function receives a search string from the request body.
-        The string is searched for in the Question model (case
-        insensitive search). Each question which matches is placed in
-        a list which is paginated else an empty list is created.
-        The success, list of current actors matched and count of
-        all actors are sent back as a jsonified response
+        The function receives an actor id in the query param and a 
+        name, age, gender in the body and updates an Actor object
+        relating to the actor id and inserts 
+        the data into the Actor model.
+        Then the Actor model is queried for all actors which are
+        sent to the paginate_items function. The success, 
+        list of current actors and count of all actors
+        are sent back as a jsonified response
         Return:
         success - True
         actors - list of dictionaries of all the actors
@@ -262,6 +261,7 @@ def create_app(test_config=None):
 # Movie APIs
 #
 
+
     @app.route('/movies', methods=['GET'])
     @requires_auth('get:movies')
     def get_movies(payload):
@@ -281,7 +281,6 @@ def create_app(test_config=None):
         '''
         selection = Movie.query.order_by(Movie.id).all()
         current_movies = paginate_items(request, selection)
-        # current_movies = {i.id: i.type for i in selection}
 
         if len(current_movies) == 0:
             abort(404)
@@ -300,20 +299,17 @@ def create_app(test_config=None):
         Endpoint: /movies/<int:movie_id
         Parameters:
         movie_id - id of the movie as an int
-        The function receives a movie id and queries the Movie model
-        filtering by id to get the actor (or a None obj). All questions
-        under that actor are then extracted from the database and the
-        resulting list of Question objects is passed to the
-        paginated_questions function which returns a page of quesions as
-        a list of dictionaries. The success, list of current questions,
-        the current actor previously passed in as a parameter and a
-        count of all the current questions are returned back as a
-        jsonified response.
+        The function receives a movie id and queries the Actor model
+        filtering by id to get the movie (or a None obj). All attributes
+        connected to that movie are then extracted from the database and the
+        resulting list of Actors objects is formatted by the models 
+        class method .format() which returns the data as
+        a dictionary. The success and dictionary of current movies attributes are 
+        passed in as a parameter as a jsonified response.
+        Return:
         Return:
         success - True
-        movie - 
-        current_actor - A string representing the question actor type
-        total_questions - a count of all questions as an int
+        movies - dictionary of all the movie id attributes
         '''
         movie = Movie.query.filter(
             Movie.id == movie_id).one_or_none()
@@ -366,24 +362,23 @@ def create_app(test_config=None):
     @app.route('/movies', methods=['POST'])
     @requires_auth('post:movies')
     def create_movie(payload):
-        ''' Add a new question to the database
+        ''' Add a new movie to the database
         Method: POST
         Endpoint: /movies
         Parameters:
         From the request body
-        question - question as a string
-        answer - answer as a string
-        difficulty - difficulty rating as an int
-        category - category as an int
-        The function receives a question, answer, difficulty rating and
-        category and instantiates a Question object from this data and
-        inserts the data into the Question model. Then the Question model
-        is queried for all movies which are sent to the paginate_movies
-        function. The success, created question id, list of current movies
+        title - title as a string
+        release_date - release_date as a datetime obj
+
+        The function receives a movie, title and
+        release_date and instantiates a Movie object from this data and
+        inserts the data into the Movie model. Then the Movie model
+        is queried for all movies which are sent to the paginate_items
+        function. The success, created movie id, list of current movies
         and count of all movies are sent back as a jsonified response
         Return:
         success - True
-        created - created question id as int
+        created - created movie id as int
         movies - list of dictionaries of all the movies
         total_movies - a count of all movies as an int
         '''
@@ -403,7 +398,7 @@ def create_app(test_config=None):
                 'success': True,
                 'created': movie.id,
                 'movies': current_movies,
-                'total_questions': len(Movie.query.all())
+                'total_movies': len(Movie.query.all())
             }), 200
 
         except:
@@ -416,16 +411,19 @@ def create_app(test_config=None):
         Method: POST
         Endpoint: /movies/<int:movie_id>
         Parameters:
+        movie_id - movie id as an int
         From the request body
-        movie - question as a string
-        age - answer as a string
-        gender - difficulty rating as an int
-        The function receives a search string from the request body.
-        The string is searched for in the Question model (case
-        insensitive search). Each question which matches is placed in
-        a list which is paginated else an empty list is created.
-        The success, list of current movies matched and count of
-        all movies are sent back as a jsonified response
+        title - title as a string
+        release_date - release_date as a datetime obj
+
+        The function receives a movie id in the query param and a 
+        title and release_date in the body and updates an Movie object
+        relating to the movie id and inserts 
+        the data into the Movie model.
+        Then the Movie model is queried for all movies which are
+        sent to the paginate_items function. The success, 
+        list of current movies and count of all movies
+        are sent back as a jsonified response
         Return:
         success - True
         movies - list of dictionaries of all the movies
@@ -457,7 +455,7 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'movies': current_movies,
-                'total_questions': len(Movie.query.all())
+                'total_movies': len(Movie.query.all())
             }), 200
 
         except:

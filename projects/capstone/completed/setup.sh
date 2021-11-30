@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+# Script to setup test environment for postman
 
+# Linux shell env for flask
 export FLASK_ENV='development'
 export FLASK_APP='app'
 
+# Python/flask drop/create database tables and create dummy data
 flask shell << EOF
 from models import setup_db, Actor, Movie, db_create_all, db_drop_and_create_all, create_dummy_data
 db_drop_and_create_all()
